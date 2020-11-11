@@ -1,12 +1,15 @@
+# SW7UP Management
+
+<div align="center">
+  <img src="https://img.shields.io/github/license/dungbik/sw7up-management?style=plastict" alt="">
+</div>
+
 # Installation
 
 ```bash
 $ touch lib/db.js (Fill with Example.)
 $ npm install
-$ npm start
 ```
-
-<br>
 
 ## Example
 
@@ -23,4 +26,12 @@ const connection = mysql.createConnection({
 connection.connect();
 
 module.exports = connection;
+```
+
+<br>
+
+# Test
+
+```bash
+$ npm start
 ```
