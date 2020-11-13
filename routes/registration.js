@@ -45,7 +45,7 @@ router.get("/delete/:id", userMiddleware.isLoggedIn, (req, res, next) => {
   db.query(
     `DELETE FROM \`registrations\` WHERE \`accountId\` = ${db.escape(
       accountData.id
-    )} AND \`subjectId\` = ${db.escape(req.params.id)};`,
+    )} AND \`courseId\` = ${db.escape(req.params.id)};`,
     (err, result) => {
       if (err) {
         return res.status(400).send({
@@ -64,9 +64,9 @@ router.get("/delete/:id", userMiddleware.isLoggedIn, (req, res, next) => {
 router.post("/register", userMiddleware.isLoggedIn, (req, res, next) => {
   const accountData = req.accountData;
   db.query(
-    `INSERT INTO \`registrations\` (\`accountId\`, \`subjectId\`) VALUES (${db.escape(
+    `INSERT INTO \`registrations\` (\`accountId\`, \`courseId\`) VALUES (${db.escape(
       accountData.id
-    )}, ${db.escape(req.body.subjectId)});`,
+    )}, ${db.escape(req.body.courseId)});`,
     (err, result) => {
       if (err) {
         return res.status(400).send({
