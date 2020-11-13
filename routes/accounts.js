@@ -11,20 +11,20 @@ router.post("/register", (req, res, next) => {
     `SELECT * FROM accounts WHERE _id = LOWER(${db.escape(req.body._id)});`,
     (err, result) => {
       if (err) {
-        return res.status(400).send({
+        return res.status(400).json({
           success: false,
           msg: err,
         });
       }
       if (result.length) {
-        return res.status(409).send({
+        return res.status(409).json({
           success: false,
           msg: "이미 가입된 학번입니다!",
         });
       } else {
         bcrypt.hash(req.body.password, 10, (err, hash) => {
           if (err) {
-            return res.status(500).send({
+            return res.status(500).json({
               success: false,
               msg: err,
             });
@@ -39,12 +39,12 @@ router.post("/register", (req, res, next) => {
               )}, ${db.escape(req.body.role)});`,
               (err, result) => {
                 if (err) {
-                  return res.status(400).send({
+                  return res.status(400).json({
                     success: false,
                     msg: err,
                   });
                 }
-                return res.status(201).send({
+                return res.status(201).json({
                   success: true,
                   msg: "회원가입 성공!",
                 });
@@ -62,13 +62,13 @@ router.post("/login", (req, res, next) => {
     `SELECT * FROM accounts WHERE _id = ${db.escape(req.body._id)};`,
     (err, result) => {
       if (err) {
-        return res.status(400).send({
+        return res.status(400).json({
           success: false,
           msg: err,
         });
       }
       if (!result.length) {
-        return res.status(400).send({
+        return res.status(400).json({
           success: false,
           msg: "존재하지 않는 학번입니다.",
         });
@@ -78,7 +78,7 @@ router.post("/login", (req, res, next) => {
         result[0]["password"],
         (bErr, bResult) => {
           if (bErr) {
-            return res.status(400).send({
+            return res.status(400).json({
               success: false,
               msg: "비밀번호를 비교하다가 에러가 발생했습니다.",
             });
@@ -106,7 +106,7 @@ router.post("/login", (req, res, next) => {
               account: result[0],
             });
           }
-          return res.status(400).send({
+          return res.status(400).json({
             success: false,
             msg: "비밀번호가 맞지 않습니다.",
           });
@@ -116,10 +116,14 @@ router.post("/login", (req, res, next) => {
   );
 });
 
+router.get("/logout", userMiddleware.isLoggedIn, (req, res, next) => {
+  res.clearCookie("w_auth").send(req.cookies.name);
+});
+
 router.get("/auth", userMiddleware.isLoggedIn, (req, res, next) => {
   const account = req.accountData;
 
-  return res.status(200).send({
+  return res.status(200).json({
     success: true,
     msg: "인증 성공!",
     account,
