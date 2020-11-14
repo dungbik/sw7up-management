@@ -94,7 +94,7 @@ router.post(
         }
       );
     } else {
-      saveCourse(req.body, res, result.insertId);
+      saveCourse(req.body, res, 0);
     }
   }
 );
