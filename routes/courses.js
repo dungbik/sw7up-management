@@ -80,7 +80,9 @@ router.post(
       db.query(
         `INSERT INTO \`files\` (\`originalFileName\`, \`serverFileName\`, \`type\`) VALUES (${db.escape(
           req.file.originalname
-        )}, ${db.escape(req.file.filename)}, ${db.escape(0)});`,
+        )}, ${db.escape(req.file.filename)}, ${db.escape(0)}, ${db.escape(
+          0
+        )});`,
         (err, result) => {
           if (err) {
             return res.status(400).send({

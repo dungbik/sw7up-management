@@ -87,7 +87,7 @@ router.post("/login", (req, res, next) => {
             const token = jwt.sign(
               {
                 id: result[0].id,
-                number: result[0]._id,
+                _id: result[0]._id,
                 name: result[0].name,
                 email: result[0].email,
                 phoneNumber: result[0].phoneNumber,
@@ -100,16 +100,30 @@ router.post("/login", (req, res, next) => {
                 expiresIn: "1h",
               }
             );
-            return res.cookie("w_auth", token).status(200).json({
-              success: true,
-              msg: "로그인 성공!",
-              account: result[0],
+            db.query(
+              `UPDATE accounts SET token = ${db.escape(
+                token
+              )} WHERE _id = ${db.escape(result[0]._id)};`,
+              (err, result) => {
+                if (err) {
+                  return res.status(400).json({
+                    success: false,
+                    msg: err,
+                  });
+                }
+                return res.cookie("w_auth", token).status(200).json({
+                  success: true,
+                  msg: "로그인 성공!",
+                  account: result[0],
+                });
+              }
+            );
+          } else {
+            return res.status(400).json({
+              success: false,
+              msg: "비밀번호가 맞지 않습니다.",
             });
           }
-          return res.status(400).json({
-            success: false,
-            msg: "비밀번호가 맞지 않습니다.",
-          });
         }
       );
     }
@@ -118,6 +132,23 @@ router.post("/login", (req, res, next) => {
 
 router.get("/logout", userMiddleware.isLoggedIn, (req, res, next) => {
   res.clearCookie("w_auth").send(req.cookies.name);
+  db.query(
+    `UPDATE accounts SET token = ${db.escape("")} WHERE _id = ${db.escape(
+      req.accountData._id
+    )};`,
+    (err, result) => {
+      if (err) {
+        return res.status(400).json({
+          success: false,
+          msg: err,
+        });
+      }
+      return res.status(200).json({
+        success: true,
+        msg: "로그아웃 성공!",
+      });
+    }
+  );
 });
 
 router.get("/auth", userMiddleware.isLoggedIn, (req, res, next) => {
@@ -128,6 +159,61 @@ router.get("/auth", userMiddleware.isLoggedIn, (req, res, next) => {
     msg: "인증 성공!",
     account,
   });
+});
+
+router.post("/modify", userMiddleware.isLoggedIn, (req, res, next) => {
+  const accountData = req.accountData;
+  if (!(req.body.role >= 0 && req.body.role < 3)) {
+    return res.status(400).json({
+      success: false,
+      msg: "잘못된 요청입니다.",
+    });
+  }
+  db.query(
+    `SELECT * FROM accounts WHERE _id = ${db.escape(accountData._id)};`,
+    (err, result) => {
+      if (err) {
+        return res.status(400).json({
+          success: false,
+          msg: err,
+        });
+      }
+      bcrypt.hash(req.body.password, 10, (err, hash) => {
+        if (err) {
+          return res.status(500).json({
+            success: false,
+            msg: err,
+          });
+        } else {
+          db.query(
+            `UPDATE accounts SET password = ${db.escape(
+              hash
+            )}, name = ${db.escape(req.body.name)}, email = ${db.escape(
+              req.body.email
+            )}, phoneNumber = ${db.escape(
+              req.body.phoneNumber
+            )}, department = ${db.escape(
+              req.body.department
+            )}, role = ${db.escape(req.body.role)} WHERE _id = ${db.escape(
+              accountData._id
+            )};`,
+            (err, result) => {
+              if (err) {
+                return res.status(400).json({
+                  success: false,
+                  msg: err,
+                });
+              }
+              return res.status(200).json({
+                success: true,
+                msg: "회원정보 수정 성공!",
+              });
+            }
+          );
+        }
+      });
+    }
+  );
 });
 
 module.exports = router;
