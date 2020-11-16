@@ -30,13 +30,13 @@ router.post("/register", (req, res, next) => {
             });
           } else {
             db.query(
-              `INSERT INTO \`accounts\` (\`_id\`, \`password\`, \`name\`, \`email\`, \`phoneNumber\`, \`department\`, \`role\`) VALUES (${db.escape(
+              `INSERT INTO \`accounts\` (\`_id\`, \`password\`, \`name\`, \`email\`, \`phoneNumber\`, \`department\`, \`role\`, \`token\`) VALUES (${db.escape(
                 req.body._id
               )}, ${db.escape(hash)}, ${db.escape(req.body.name)}, ${db.escape(
                 req.body.email
               )}, ${db.escape(req.body.phoneNumber)}, ${db.escape(
                 req.body.department
-              )}, ${db.escape(req.body.role)});`,
+              )}, ${db.escape(req.body.role)}, ${db.escape("")});`,
               (err, result) => {
                 if (err) {
                   return res.status(400).json({

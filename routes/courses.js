@@ -1,3 +1,4 @@
+const { resolveSoa } = require("dns");
 const express = require("express");
 const router = express.Router();
 var multer = require("multer");
@@ -20,22 +21,45 @@ let upload = multer({
 const db = require("../lib/db");
 const userMiddleware = require("../middleware/accounts");
 
+function getCount(id) {
+  return new Promise(function (resolve, reject) {
+    db.query(
+      `SELECT COUNT(*) as cnt FROM registrations WHERE courseId = ${db.escape(
+        id
+      )};`,
+      (err, result) => {
+        if (err) {
+          return res.status(400).send({
+            success: false,
+            msg: err,
+          });
+        }
+        resolve(result[0].cnt);
+      }
+    );
+  });
+}
+
 router.get("/:year/:semester", userMiddleware.isLoggedIn, (req, res, next) => {
   const accountData = req.accountData;
   db.query(
     `SELECT * FROM \`courses\` WHERE \`year\` = ${db.escape(
       req.params.year
     )} AND \`semester\` = ${db.escape(req.params.semester)};`,
-    (err, result) => {
+    async (err, result) => {
       if (err) {
         return res.status(400).send({
           success: false,
           msg: err,
         });
       }
+      let courseData = result;
+      for (let i = 0; i < courseData.length; i++)
+        courseData[i].appliedCount = await getCount(courseData[i].id);
+
       return res.status(200).send({
         success: true,
-        result,
+        courseData,
       });
     }
   );

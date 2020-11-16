@@ -21,7 +21,7 @@ router.get("/", userMiddleware.isLoggedIn, (req, res, next) => {
       ids = result.map((n) => n.id);
 
       db.query(
-        `SELECT * FROM \`subjects\` WHERE \`id\` IN (${db.escape(ids)});`,
+        `SELECT * FROM \`courses\` WHERE \`id\` IN (${db.escape(ids)});`,
         (err, result) => {
           if (err) {
             return res.status(400).send({
