@@ -37,7 +37,7 @@ CREATE TABLE `accounts` (
   `role` tinyint(1) unsigned NOT NULL,
   `token` varchar(500) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `accounts`
@@ -57,6 +57,7 @@ CREATE TABLE `courses` (
   `year` varchar(4) NOT NULL,
   `semester` varchar(1) NOT NULL,
   `department` tinyint(1) unsigned NOT NULL,
+  `courseName` varchar(20) NOT NULL,
   `professorName` varchar(10) NOT NULL,
   `tutorName` varchar(10) NOT NULL,
   `tutorNumber` varchar(10) NOT NULL,

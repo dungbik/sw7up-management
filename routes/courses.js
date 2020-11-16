@@ -43,13 +43,17 @@ router.get("/:year/:semester", userMiddleware.isLoggedIn, (req, res, next) => {
 
 function saveCourse(body, res, fileId) {
   db.query(
-    `INSERT INTO \`courses\` (\`year\`, \`semester\`, \`department\`, \`professorName\`, \`tutorName\`, \`tutorNumber\`, \`limit\`, \`fileId\`) VALUES (${db.escape(
+    `INSERT INTO \`courses\` (\`year\`, \`semester\`, \`department\`, \`courseName\`, \`professorName\`, \`tutorName\`, \`tutorNumber\`, \`limit\`, \`fileId\`) VALUES (${db.escape(
       body.year
     )}, ${db.escape(body.semester)}, ${db.escape(body.department)}, ${db.escape(
-      body.professorName
-    )}, ${db.escape(body.tutorName)}, ${db.escape(
-      body.tutorNumber
-    )}, ${db.escape(body.limit)}, ${db.escape(fileId)});`,
+      body.courseName
+    )},, ${db.escape(body.semester)}, ${db.escape(
+      body.department
+    )}, ${db.escape(body.professorName)}, ${db.escape(
+      body.tutorName
+    )}, ${db.escape(body.tutorNumber)}, ${db.escape(body.limit)}, ${db.escape(
+      fileId
+    )});`,
     /*db.query(
     `INSERT INTO \`courses\` (\`year\`, \`semester\`, \`department\`, \`professorName\`, \`tutorName\`, \`tutorNumber\`, \`limit\`, \`fileId\`) VALUES (${db.escape(
       2020
