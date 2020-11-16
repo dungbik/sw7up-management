@@ -1,0 +1,21 @@
+git clone 주소
+
+git remote add upstream 주소
+
+git checkout -b 브랜치이름
+
+git add src/*
+
+
+git fetch upstream develop
+git merge upstream/develop
+git push origin master
+
+git checkout -b 브랜치이름
+git rebase upstream/develop
+작업해
+git add src/*
+git commit
+git push origin 브랜치이름
+
+pr

@@ -1,11 +1,16 @@
 const { resolveSoa } = require("dns");
 const express = require("express");
 const router = express.Router();
-var multer = require("multer");
+const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
+const mime = require("mime");
+
+const uploadFolder = "uploadFiles/";
+
 let storage = multer.diskStorage({
   destination: function (req, file, callback) {
-    callback(null, "uploadFiles/");
+    callback(null, uploadFolder);
   },
   filename: function (req, file, callback) {
     let extension = path.extname(file.originalname);
@@ -76,12 +81,6 @@ function saveCourse(body, res, fileId) {
     )}, ${db.escape(body.tutorNumber)}, ${db.escape(body.limit)}, ${db.escape(
       fileId
     )});`,
-    /*db.query(
-    `INSERT INTO \`courses\` (\`year\`, \`semester\`, \`department\`, \`professorName\`, \`tutorName\`, \`tutorNumber\`, \`limit\`, \`fileId\`) VALUES (${db.escape(
-      2020
-    )}, ${db.escape(1)}, ${db.escape(0)}, ${db.escape("조겨리")}, ${db.escape(
-      "윤정환"
-    )}, ${db.escape(2018037010)}, ${db.escape(5)}, ${db.escape(fileId)});`,*/
     (err, result) => {
       if (err) {
         return res.status(400).send({
@@ -138,6 +137,47 @@ router.get("/delete/:id", userMiddleware.isAdmin, (req, res, next) => {
         success: true,
         msg: "튜터링 강의 삭제 성공!",
       });
+    }
+  );
+});
+
+router.get("/download/:fileId", function (req, res, next) {
+  db.query(
+    `SELECT * FROM \`files\` WHERE id = ${db.escape(req.params.fileId)};`,
+    (err, result) => {
+      if (err) {
+        return res.status(400).send({
+          success: false,
+          msg: err,
+        });
+      }
+      const file = uploadFolder + result[0].serverFileName;
+
+      try {
+        if (fs.existsSync(file)) {
+          var filename = path.basename(file);
+          res.setHeader(
+            "Content-disposition",
+            "attachment; filename=" + result[0].originalFileName
+          );
+          res.setHeader("Content-type", "application/octet-stream");
+
+          var filestream = fs.createReadStream(file);
+          filestream.pipe(res);
+        } else {
+          return res.status(400).send({
+            success: false,
+            msg: "서버에 파일이 존재하지 않습니다.",
+          });
+        }
+      } catch (e) {
+        if (err) {
+          return res.status(400).send({
+            success: false,
+            msg: e,
+          });
+        }
+      }
     }
   );
 });
