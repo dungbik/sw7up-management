@@ -45,30 +45,34 @@ function getCount(id) {
   });
 }
 
-router.get("/:year/:semester", userMiddleware.isLoggedIn, (req, res, next) => {
-  const accountData = req.accountData;
-  db.query(
-    `SELECT * FROM \`courses\` WHERE \`year\` = ${db.escape(
-      req.params.year
-    )} AND \`semester\` = ${db.escape(req.params.semester)};`,
-    async (err, result) => {
-      if (err) {
-        return res.status(400).send({
-          success: false,
-          msg: err,
+router.get(
+  "find/:year/:semester",
+  userMiddleware.isLoggedIn,
+  (req, res, next) => {
+    const accountData = req.accountData;
+    db.query(
+      `SELECT * FROM \`courses\` WHERE \`year\` = ${db.escape(
+        req.params.year
+      )} AND \`semester\` = ${db.escape(req.params.semester)};`,
+      async (err, result) => {
+        if (err) {
+          return res.status(400).send({
+            success: false,
+            msg: err,
+          });
+        }
+        let courseData = result;
+        for (let i = 0; i < courseData.length; i++)
+          courseData[i].appliedCount = await getCount(courseData[i].id);
+
+        return res.status(200).send({
+          success: true,
+          courseData,
         });
       }
-      let courseData = result;
-      for (let i = 0; i < courseData.length; i++)
-        courseData[i].appliedCount = await getCount(courseData[i].id);
-
-      return res.status(200).send({
-        success: true,
-        courseData,
-      });
-    }
-  );
-});
+    );
+  }
+);
 
 function saveCourse(body, res, fileId) {
   db.query(
