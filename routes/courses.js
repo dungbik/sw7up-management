@@ -46,7 +46,7 @@ function getCount(id) {
 }
 
 router.get(
-  "find/:year/:semester",
+  "/find/:year/:semester",
   userMiddleware.isLoggedIn,
   (req, res, next) => {
     const accountData = req.accountData;
