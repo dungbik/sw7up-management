@@ -58,6 +58,7 @@ router.post("/register", (req, res, next) => {
 });
 
 router.post("/login", (req, res, next) => {
+  console.log(req.body);
   db.query(
     `SELECT * FROM accounts WHERE _id = ${db.escape(req.body._id)};`,
     (err, result) => {

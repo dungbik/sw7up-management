@@ -35,6 +35,7 @@ CREATE TABLE `accounts` (
   `phoneNumber` varchar(45) NOT NULL,
   `department` tinyint(1) unsigned NOT NULL,
   `role` tinyint(1) unsigned NOT NULL,
+  `token` varchar(500) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
@@ -43,8 +44,6 @@ CREATE TABLE `accounts` (
 --
 
 /*!40000 ALTER TABLE `accounts` DISABLE KEYS */;
-INSERT INTO `accounts` (`id`,`_id`,`password`,`name`,`email`,`phoneNumber`,`department`,`role`) VALUES 
- (1,'admin','$2a$10$KVIZvMkRyb08isNhNT/kIeMHrWqo0vlIehLAdPbEuK6WHz/Foow/K','관리자','admin@cbnu.ac.kr','01000000000',0,3);
 /*!40000 ALTER TABLE `accounts` ENABLE KEYS */;
 
 
