@@ -141,7 +141,7 @@ router.get("/delete/:id", userMiddleware.isAdmin, (req, res, next) => {
   );
 });
 
-router.get("/download/:fileId", function (req, res, next) {
+router.get("/download/:fileId", userMiddleware.isLoggedIn, (req, res, next) => {
   db.query(
     `SELECT * FROM \`files\` WHERE id = ${db.escape(req.params.fileId)};`,
     (err, result) => {
