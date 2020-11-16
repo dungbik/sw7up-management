@@ -58,7 +58,6 @@ router.post("/register", (req, res, next) => {
 });
 
 router.post("/login", (req, res, next) => {
-  console.log(req.body);
   db.query(
     `SELECT * FROM accounts WHERE _id = ${db.escape(req.body._id)};`,
     (err, result) => {
@@ -74,9 +73,10 @@ router.post("/login", (req, res, next) => {
           msg: "존재하지 않는 학번입니다.",
         });
       }
+      const accountData = result[0];
       bcrypt.compare(
         req.body.password,
-        result[0]["password"],
+        accountData["password"],
         (bErr, bResult) => {
           if (bErr) {
             return res.status(400).json({
@@ -87,14 +87,14 @@ router.post("/login", (req, res, next) => {
           if (bResult) {
             const token = jwt.sign(
               {
-                id: result[0].id,
-                _id: result[0]._id,
-                name: result[0].name,
-                email: result[0].email,
-                phoneNumber: result[0].phoneNumber,
-                department: result[0].department,
-                role: result[0].role,
-                isAdmin: result[0].role === 3 ? true : false,
+                id: accountData.id,
+                _id: accountData._id,
+                name: accountData.name,
+                email: accountData.email,
+                phoneNumber: accountData.phoneNumber,
+                department: accountData.department,
+                role: accountData.role,
+                isAdmin: accountData.role === 3 ? true : false,
               },
               "BESTSW7UP",
               {
@@ -104,7 +104,7 @@ router.post("/login", (req, res, next) => {
             db.query(
               `UPDATE accounts SET token = ${db.escape(
                 token
-              )} WHERE _id = ${db.escape(result[0]._id)};`,
+              )} WHERE _id = ${db.escape(accountData._id)};`,
               (err, result) => {
                 if (err) {
                   return res.status(400).json({
@@ -115,7 +115,7 @@ router.post("/login", (req, res, next) => {
                 return res.cookie("w_auth", token).status(200).json({
                   success: true,
                   msg: "로그인 성공!",
-                  account: result[0],
+                  account: accountData,
                 });
               }
             );
