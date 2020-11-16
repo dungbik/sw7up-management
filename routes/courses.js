@@ -4,7 +4,7 @@ const router = express.Router();
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
-const mime = require("mime");
+const mime = require("mime-types");
 
 const uploadFolder = "uploadFiles/";
 
@@ -159,12 +159,13 @@ router.get("/download/:fileId", userMiddleware.isLoggedIn, (req, res, next) => {
 
       try {
         if (fs.existsSync(file)) {
-          var filename = path.basename(file);
+          const mimeType = mime.lookup(file);
+
           res.setHeader(
             "Content-disposition",
             "attachment; filename=" + result[0].originalFileName
           );
-          res.setHeader("Content-type", "application/octet-stream");
+          res.setHeader("Content-type", mimeType);
 
           var filestream = fs.createReadStream(file);
           filestream.pipe(res);
