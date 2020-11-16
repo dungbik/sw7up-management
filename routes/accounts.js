@@ -132,7 +132,7 @@ router.post("/login", (req, res, next) => {
 });
 
 router.get("/logout", userMiddleware.isLoggedIn, (req, res, next) => {
-  res.clearCookie("w_auth").send(req.cookies.name);
+  res.clearCookie("w_auth");
   db.query(
     `UPDATE accounts SET token = ${db.escape("")} WHERE _id = ${db.escape(
       req.accountData._id
