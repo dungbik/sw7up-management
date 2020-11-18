@@ -7,25 +7,17 @@
 # Installation
 
 ```bash
-$ touch lib/db.js (Fill with Example.)
+$ touch .env(.dev) (Fill with Example)
 $ npm install
 ```
 
 ## Example
 
-```js
-const mysql = require("mysql");
-
-const connection = mysql.createConnection({
-  host: "host",
-  user: "user",
-  database: "database",
-  password: "password",
-});
-
-connection.connect();
-
-module.exports = connection;
+```
+HOST = host
+USER = user
+DATABASE = databse
+PASSWORD = password
 ```
 
 <br>
