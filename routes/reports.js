@@ -76,6 +76,48 @@ router.post(
 
 router.post("/modify", userMiddleware.isLoggedIn, (req, res, next) => {});
 
-router.get("/:id", userMiddleware.isAdmin, (req, res, next) => {});
+function getReports(id, week) {
+  return new Promise(function (resolve, reject) {
+    let sql = `SELECT * FROM reports WHERE courseId = ${db.escape(id)}`;
+    if (week > 0) {
+      sql += ` AND week = ${week}`;
+    }
+    db.query(sql + ";", (err, result) => {
+      if (err) {
+        return res.status(400).send({
+          success: false,
+          msg: err,
+        });
+      }
+      resolve(result);
+    });
+  });
+}
+
+router.post("/find", userMiddleware.isAdmin, (req, res, next) => {
+  const accountData = req.accountData;
+  const week = req.body.week ? req.body.week : 0;
+  db.query(
+    `SELECT * FROM \`courses\` WHERE \`year\` = ${db.escape(
+      req.body.year
+    )} AND \`semester\` = ${db.escape(req.body.semester)};`,
+    async (err, result) => {
+      if (err) {
+        return res.status(400).send({
+          success: false,
+          msg: err,
+        });
+      }
+      let courseData = result;
+      for (let i = 0; i < courseData.length; i++)
+        courseData[i].reports = await getReports(courseData[i].id, week);
+
+      return res.status(200).send({
+        success: true,
+        courseData,
+      });
+    }
+  );
+});
 
 module.exports = router;
