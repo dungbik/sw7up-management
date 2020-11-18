@@ -1,7 +1,8 @@
-db.js
-
 node_modules
 
 client
 
 uploadFiles
+
+.env
+.env.dev

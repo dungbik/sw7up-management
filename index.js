@@ -1,11 +1,17 @@
 const express = require("express");
 const app = express();
-//const cors = require("cors");
 
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const dotenv = require("dotenv");
+const path = require("path");
 
-//app.use(cors());
+dotenv.config({
+  path: path.resolve(
+    process.cwd(),
+    process.env.NODE_ENV == "production" ? ".env" : ".env.dev"
+  ),
+});
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
