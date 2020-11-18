@@ -49,7 +49,7 @@ router.post(
               accountData.id
             )}, ${db.escape(req.params.courseId)}, ${db.escape(
               req.params.week
-            )}, ${db.escape(1)});`,
+            )}, ${db.escape(result.insertId)});`,
             (err, result) => {
               if (err) {
                 return res.status(400).send({
@@ -74,7 +74,115 @@ router.post(
   }
 );
 
-router.post("/modify", userMiddleware.isLoggedIn, (req, res, next) => {});
+router.post(
+  "/modify",
+  userMiddleware.isLoggedIn,
+  upload.single("file"),
+  (req, res, next) => {
+    const accountData = req.accountData;
+    if (req.file) {
+      db.query(
+        `SELECT * FROM reports WHERE courseId = ${db.escape(
+          req.params.courseId
+        )} AND week = ${db.escape(req.params.week)};`,
+        (err, result) => {
+          if (err) {
+            return res.status(400).json({
+              success: false,
+              msg: err,
+            });
+          }
+          if (result[0].accountId != accountData.id) {
+            return res.status(400).json({
+              success: false,
+              msg: "허용되지않은 접근입니다.",
+            });
+          }
+          const reportId = result[0].id;
+          const fileId = result[0].fileId;
+          db.query(
+            `SELECT * FROM files WHERE id = ${db.escape(fileId)};`,
+            (err, result) => {
+              if (err) {
+                return res.status(400).json({
+                  success: false,
+                  msg: err,
+                });
+              }
+              const filePath = uploadFolder + result[0].serverFileName;
+
+              fs.access(filePath, fs.constants.F_OK, (err) => {
+                if (err) {
+                  return res.status(400).json({
+                    success: false,
+                    msg: err,
+                  });
+                }
+
+                fs.unlink(filePath, (err) => {
+                  if (err) {
+                    return res.status(400).json({
+                      success: false,
+                      msg: err,
+                    });
+                  }
+                  db.query(
+                    `DELETE FROM \`files\` WHERE \`id\` = ${db.escape(
+                      fileId
+                    )};`,
+                    (err, result) => {
+                      if (err) {
+                        return res.status(400).send({
+                          success: false,
+                          msg: err,
+                        });
+                      }
+                      db.query(
+                        `INSERT INTO \`files\` (\`originalFileName\`, \`serverFileName\`, \`type\`) VALUES (${db.escape(
+                          req.file.originalname
+                        )}, ${db.escape(req.file.filename)}, ${db.escape(1)});`,
+                        (err, result) => {
+                          if (err) {
+                            return res.status(400).send({
+                              success: false,
+                              msg: err,
+                            });
+                          }
+                          db.query(
+                            `UPDATE reports SET fileId = ${db.escape(
+                              result.insertId
+                            )} WHERE id = ${reportId};`,
+                            (err, result) => {
+                              if (err) {
+                                return res.status(400).send({
+                                  success: false,
+                                  msg: err,
+                                });
+                              }
+                              return res.status(200).send({
+                                success: true,
+                                msg: "보고서 수정 성공!",
+                              });
+                            }
+                          );
+                        }
+                      );
+                    }
+                  );
+                });
+              });
+            }
+          );
+        }
+      );
+    } else {
+      return res.status(400).json({
+        success: false,
+        msg: "보고서 파일이 없습니다.",
+      });
+    }
+  }
+);
 
 function getReports(id, week) {
   return new Promise(function (resolve, reject) {
@@ -95,7 +203,6 @@ function getReports(id, week) {
 }
 
 router.post("/find", userMiddleware.isAdmin, (req, res, next) => {
-  const accountData = req.accountData;
   const week = req.body.week ? req.body.week : 0;
   db.query(
     `SELECT * FROM \`courses\` WHERE \`year\` = ${db.escape(
