@@ -37,13 +37,15 @@ CREATE TABLE `accounts` (
   `role` tinyint(1) unsigned NOT NULL,
   `token` varchar(500) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `accounts`
 --
 
 /*!40000 ALTER TABLE `accounts` DISABLE KEYS */;
+INSERT INTO `accounts` (`id`,`_id`,`password`,`name`,`email`,`phoneNumber`,`department`,`role`,`token`) VALUES 
+ (1,'admin','$2a$10$hptYHxypEhFqqze2p2IUv.jZU7u6ZgXutvMoOZvSNOOc.uDSf.H96','관리자','admin@cbnu.ac.kr','01000000000',0,3,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiX2lkIjoiYWRtaW4iLCJuYW1lIjoi6rSA66as7J6QIiwiZW1haWwiOiJhZG1pbkBjYm51LmFjLmtyIiwicGhvbmVOdW1iZXIiOiIwMTAwMDAwMDAwMCIsImRlcGFydG1lbnQiOjAsInJvbGUiOjMsImlzQWRtaW4iOnRydWUsImlhdCI6MTYwNTUwNzcxMiwiZXhwIjoxNjA1NTExMzEyfQ.In4nwky3Bk1LJYeIK3YL3pKr0_Pkgvqdc5bJO9d0gQI');
 /*!40000 ALTER TABLE `accounts` ENABLE KEYS */;
 
 
@@ -64,7 +66,7 @@ CREATE TABLE `courses` (
   `limit` tinyint(1) unsigned NOT NULL,
   `fileId` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `courses`
@@ -85,7 +87,7 @@ CREATE TABLE `files` (
   `serverFileName` varchar(45) NOT NULL,
   `type` tinyint(1) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `files`
@@ -105,7 +107,7 @@ CREATE TABLE `registrations` (
   `accountId` int(10) unsigned NOT NULL,
   `courseId` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `registrations`
@@ -123,10 +125,10 @@ DROP TABLE IF EXISTS `reports`;
 CREATE TABLE `reports` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `accountId` int(10) unsigned NOT NULL,
+  `courseId` int(10) unsigned NOT NULL,
   `week` int(10) unsigned NOT NULL,
-  `fileId` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `reports`

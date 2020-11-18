@@ -45,9 +45,11 @@ router.post(
             });
           }
           db.query(
-            `INSERT INTO \`reports\` (\`accountId\`, \`week\`, \`fileId\`) VALUES (${db.escape(
+            `INSERT INTO \`reports\` (\`accountId\`,\`courseId\`, \`week\`, \`fileId\`) VALUES (${db.escape(
               accountData.id
-            )}, ${db.escape(req.params.week)}, ${db.escape(1)});`,
+            )}, ${db.escape(req.params.courseId)}, ${db.escape(
+              req.params.week
+            )}, ${db.escape(1)});`,
             (err, result) => {
               if (err) {
                 return res.status(400).send({
@@ -71,6 +73,8 @@ router.post(
     }
   }
 );
+
+router.post("/modify", userMiddleware.isLoggedIn, (req, res, next) => {});
 
 router.get("/:id", userMiddleware.isAdmin, (req, res, next) => {});
 
