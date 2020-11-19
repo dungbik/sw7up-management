@@ -45,7 +45,7 @@ CREATE TABLE `accounts` (
 
 /*!40000 ALTER TABLE `accounts` DISABLE KEYS */;
 INSERT INTO `accounts` (`id`,`_id`,`password`,`name`,`email`,`phoneNumber`,`department`,`role`,`token`) VALUES 
- (1,'admin','$2a$10$hptYHxypEhFqqze2p2IUv.jZU7u6ZgXutvMoOZvSNOOc.uDSf.H96','관리자','admin@cbnu.ac.kr','01000000000',0,3,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiX2lkIjoiYWRtaW4iLCJuYW1lIjoi6rSA66as7J6QIiwiZW1haWwiOiJhZG1pbkBjYm51LmFjLmtyIiwicGhvbmVOdW1iZXIiOiIwMTAwMDAwMDAwMCIsImRlcGFydG1lbnQiOjAsInJvbGUiOjMsImlzQWRtaW4iOnRydWUsImlhdCI6MTYwNTUwNzcxMiwiZXhwIjoxNjA1NTExMzEyfQ.In4nwky3Bk1LJYeIK3YL3pKr0_Pkgvqdc5bJO9d0gQI');
+ (1,'admin','$2a$10$hptYHxypEhFqqze2p2IUv.jZU7u6ZgXutvMoOZvSNOOc.uDSf.H96','관리자','admin@cbnu.ac.kr','01000000000',0,3,'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiX2lkIjoiYWRtaW4iLCJuYW1lIjoi6rSA66as7J6QIiwiZW1haWwiOiJhZG1pbkBjYm51LmFjLmtyIiwicGhvbmVOdW1iZXIiOiIwMTAwMDAwMDAwMCIsImRlcGFydG1lbnQiOjAsInJvbGUiOjMsImlzQWRtaW4iOnRydWUsImlhdCI6MTYwNTc3MzI2NiwiZXhwIjoxNjA1Nzc2ODY2fQ.Y_JH1gEzGZzE2qAT4trNuYIzrv7bGRLyyGEfmyP_lWI');
 /*!40000 ALTER TABLE `accounts` ENABLE KEYS */;
 
 
@@ -66,7 +66,7 @@ CREATE TABLE `courses` (
   `limit` tinyint(1) unsigned NOT NULL,
   `fileId` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `courses`
@@ -87,7 +87,7 @@ CREATE TABLE `files` (
   `serverFileName` varchar(45) NOT NULL,
   `type` tinyint(1) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `files`
@@ -95,6 +95,29 @@ CREATE TABLE `files` (
 
 /*!40000 ALTER TABLE `files` DISABLE KEYS */;
 /*!40000 ALTER TABLE `files` ENABLE KEYS */;
+
+
+--
+-- Definition of table `periods`
+--
+
+DROP TABLE IF EXISTS `periods`;
+CREATE TABLE `periods` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `systemId` int(10) unsigned NOT NULL,
+  `year` int(10) unsigned NOT NULL,
+  `semester` int(10) unsigned NOT NULL,
+  `start` bigint(20) unsigned NOT NULL,
+  `end` bigint(20) unsigned NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `periods`
+--
+
+/*!40000 ALTER TABLE `periods` DISABLE KEYS */;
+/*!40000 ALTER TABLE `periods` ENABLE KEYS */;
 
 
 --
@@ -107,7 +130,7 @@ CREATE TABLE `registrations` (
   `accountId` int(10) unsigned NOT NULL,
   `courseId` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `registrations`
@@ -127,8 +150,9 @@ CREATE TABLE `reports` (
   `accountId` int(10) unsigned NOT NULL,
   `courseId` int(10) unsigned NOT NULL,
   `week` int(10) unsigned NOT NULL,
+  `fileId` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `reports`
@@ -136,6 +160,27 @@ CREATE TABLE `reports` (
 
 /*!40000 ALTER TABLE `reports` DISABLE KEYS */;
 /*!40000 ALTER TABLE `reports` ENABLE KEYS */;
+
+
+--
+-- Definition of table `systems`
+--
+
+DROP TABLE IF EXISTS `systems`;
+CREATE TABLE `systems` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) CHARACTER SET utf8 NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `systems`
+--
+
+/*!40000 ALTER TABLE `systems` DISABLE KEYS */;
+INSERT INTO `systems` (`id`,`name`) VALUES 
+ (1,'튜터링');
+/*!40000 ALTER TABLE `systems` ENABLE KEYS */;
 
 
 
