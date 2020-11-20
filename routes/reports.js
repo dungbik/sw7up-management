@@ -24,6 +24,7 @@ let upload = multer({
 
 const db = require("../lib/db");
 const userMiddleware = require("../middleware/accounts");
+const { resolveCname } = require("dns");
 
 router.post(
   "/upload",
@@ -202,8 +203,41 @@ function getReports(id, week) {
   });
 }
 
-router.post("/find", userMiddleware.isAdmin, (req, res, next) => {
+function getResult(sql) {
+  return new Promise((resolve, reject) => {
+    db.query(sql, (err, result) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(result);
+    });
+  });
+}
+
+router.post("/find", userMiddleware.isAdmin, async (req, res, next) => {
   const week = req.body.week ? req.body.week : 0;
+  await getResult(
+    `SELECT * FROM \`courses\` WHERE \`year\` = ${db.escape(
+      req.body.year
+    )} AND \`semester\` = ${db.escape(req.body.semester)};`
+  )
+    .then(async (result) => {
+      let courseData = result;
+      for (let i = 0; i < courseData.length; i++)
+        courseData[i].reports = await getReports(courseData[i].id, week);
+      res.status(200).send({
+        success: true,
+        courseData,
+      });
+    })
+    .catch((err) => {
+      res.status(400).send({
+        success: false,
+        msg: err,
+      });
+    });
+
+  /*
   db.query(
     `SELECT * FROM \`courses\` WHERE \`year\` = ${db.escape(
       req.body.year
@@ -224,7 +258,7 @@ router.post("/find", userMiddleware.isAdmin, (req, res, next) => {
         courseData,
       });
     }
-  );
+  );*/
 });
 
 module.exports = router;
