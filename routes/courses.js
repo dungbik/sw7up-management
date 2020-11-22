@@ -6,7 +6,7 @@ const path = require("path");
 const fs = require("fs");
 const mime = require("mime-types");
 
-const { getResult } = require("../lib/util");
+const { getResult, getDownloadFilename } = require("../lib/util");
 
 const uploadFolder = "uploadFiles/";
 
@@ -223,10 +223,14 @@ router.get("/download/:fileId", userMiddleware.isLoggedIn, (req, res, next) => {
 
           res.setHeader(
             "Content-disposition",
-            "attachment; filename=" + result[0].originalFileName
+            "attachment; filename=" +
+              getDownloadFilename(result[0].originalFileName)
           );
           res.setHeader("Content-type", mimeType);
-          res.setHeader("File-Name", result[0].originalFileName);
+          res.setHeader(
+            "File-Name",
+            getDownloadFilename(result[0].originalFileName)
+          );
 
           var filestream = fs.createReadStream(file);
           filestream.pipe(res);
