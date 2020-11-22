@@ -132,7 +132,21 @@ function updateCourse(jsonRes, res, fileId) {
   console.log("uc");
   console.log(jsonRes);
   db.query(
-    `UPDATE courses SET \`year\` = ${jsonRes.year}, \`semester\` = ${jsonRes.semester}, \`department\` = ${jsonRes.department}, \`grade\` = ${jsonRes.grade}, \`courseName\` = ${jsonRes.courseName}, \`professorName\` = ${jsonRes.professorName}, \`tutorName\` = ${jsonRes.tutorName}, \`tutorNumber\` = ${jsonRes.tutorNumber}, \`limit\` = ${jsonRes.limit}, \`fileId\` = ${fileId} WHERE id = ${jsonRes.courseId};`,
+    `UPDATE \`courses\` SET \`year\` = ${db.escape(
+      jsonRes.year
+    )}, \`semester\` = ${db.escape(jsonRes.semester)}, 
+    \`department\` = ${db.escape(jsonRes.department)}, \`grade\` = ${db.escape(
+      jsonRes.grade
+    )}, 
+    \`courseName\` = ${db.escape(
+      jsonRes.courseName
+    )}, \`professorName\` = ${db.escape(jsonRes.professorName)}, 
+    \`tutorName\` = ${db.escape(
+      jsonRes.tutorName
+    )}, \`tutorNumber\` = ${db.escape(jsonRes.tutorNumber)}, 
+    \`limit\` = ${db.escape(jsonRes.limit)}, \`fileId\` = ${db.escape(
+      fileId
+    )} WHERE \`id\` = ${db.escape(jsonRes.courseId)};`,
     (err, result) => {
       console.log(err, result);
       if (err) {
