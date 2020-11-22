@@ -59,6 +59,7 @@ CREATE TABLE `courses` (
   `year` varchar(4) NOT NULL,
   `semester` varchar(1) NOT NULL,
   `department` tinyint(1) unsigned NOT NULL,
+  `grade` tinyint(1) unsigned NOT NULL,
   `courseName` varchar(20) NOT NULL,
   `professorName` varchar(10) NOT NULL,
   `tutorName` varchar(10) NOT NULL,
