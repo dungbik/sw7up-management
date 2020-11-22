@@ -151,10 +151,9 @@ router.post(
   userMiddleware.isLoggedIn,
   upload.single("file"),
   async (req, res, next) => {
-    const jsonRes = req.body;
     await getResult(
       db,
-      `SELECT * FROM \`courses\` WHERE id=${jsonRes.courseId}`
+      `SELECT * FROM \`courses\` WHERE id = ${req.body.courseId};`
     )
       .then((result) => {
         const fileId = result.fileId;
@@ -170,11 +169,12 @@ router.post(
                   msg: err,
                 });
               }
-              updateCourse(jsonRes, res, result.insertId);
+
+              updateCourse(req.body, res, result.insertId);
             }
           );
         } else {
-          updateCourse(jsonRes, res, fileId);
+          updateCourse(req.body, res, fileId);
         }
       })
       .catch((err) => {
