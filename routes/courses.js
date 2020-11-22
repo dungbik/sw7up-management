@@ -6,6 +6,8 @@ const path = require("path");
 const fs = require("fs");
 const mime = require("mime-types");
 
+const { getResult } = require("../lib/util");
+
 const uploadFolder = "uploadFiles/";
 
 let storage = multer.diskStorage({
@@ -123,6 +125,64 @@ router.post(
     } else {
       saveCourse(req.body, res, 0);
     }
+  }
+);
+
+function updateCourse(jsonRes, res, fileId) {
+  db.query(
+    `UPDATE courses SET \`year\` = ${jsonRes.year}, \`semester\` = ${jsonRes.semester}, \`department\` = ${jsonRes.department}, \`courseName\` = ${jsonRes.courseName}, \`professorName\` = ${jsonRes.professorName}, tutorName = ${jsonRes.tutorName}, \`tutorNumber\` = ${jsonRes.tutorNumber}, \`limit\` = ${jsonRes.limit}, \`fileId\` = ${fileId} WHERE id = ${jsonRes.courseId};`,
+    (err, result) => {
+      if (err) {
+        return res.status(400).send({
+          success: false,
+          msg: err,
+        });
+      }
+      return res.status(201).send({
+        success: true,
+        msg: "튜터링 강의 수정 성공!",
+      });
+    }
+  );
+}
+
+router.post(
+  "/modify",
+  userMiddleware.isLoggedIn,
+  upload.single("file"),
+  async (req, res, next) => {
+    const jsonRes = req.body;
+    await getResult(
+      db,
+      `SELECT * FROM \`courses\` WHERE id=${jsonRes.courseId}`
+    )
+      .then((result) => {
+        const fileId = result.fileId;
+        if (req.file) {
+          db.query(
+            `INSERT INTO \`files\` (\`originalFileName\`, \`serverFileName\`, \`type\`) VALUES (${db.escape(
+              req.file.originalname
+            )}, ${db.escape(req.file.filename)}, ${db.escape(0)});`,
+            (err, result) => {
+              if (err) {
+                return res.status(400).send({
+                  success: false,
+                  msg: err,
+                });
+              }
+              updateCourse(jsonRes, res, result.insertId);
+            }
+          );
+        } else {
+          updateCourse(jsonRes, res, fileId);
+        }
+      })
+      .catch((err) => {
+        return res.status(400).send({
+          success: false,
+          msg: err,
+        });
+      });
   }
 );
 

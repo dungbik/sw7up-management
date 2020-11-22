@@ -4,7 +4,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const mime = require("mime-types");
-
+const { getResult } = require("../lib/util");
 const uploadFolder = "uploadFiles/";
 
 let storage = multer.diskStorage({
@@ -203,20 +203,10 @@ function getReports(id, week) {
   });
 }
 
-function getResult(sql) {
-  return new Promise((resolve, reject) => {
-    db.query(sql, (err, result) => {
-      if (err) {
-        reject(err);
-      }
-      resolve(result);
-    });
-  });
-}
-
 router.post("/find", userMiddleware.isAdmin, async (req, res, next) => {
   const week = req.body.week ? req.body.week : 0;
   await getResult(
+    db,
     `SELECT * FROM \`courses\` WHERE \`year\` = ${db.escape(
       req.body.year
     )} AND \`semester\` = ${db.escape(req.body.semester)};`
@@ -236,29 +226,6 @@ router.post("/find", userMiddleware.isAdmin, async (req, res, next) => {
         msg: err,
       });
     });
-
-  /*
-  db.query(
-    `SELECT * FROM \`courses\` WHERE \`year\` = ${db.escape(
-      req.body.year
-    )} AND \`semester\` = ${db.escape(req.body.semester)};`,
-    async (err, result) => {
-      if (err) {
-        return res.status(400).send({
-          success: false,
-          msg: err,
-        });
-      }
-      let courseData = result;
-      for (let i = 0; i < courseData.length; i++)
-        courseData[i].reports = await getReports(courseData[i].id, week);
-
-      return res.status(200).send({
-        success: true,
-        courseData,
-      });
-    }
-  );*/
 });
 
 module.exports = router;
