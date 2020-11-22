@@ -130,9 +130,11 @@ router.post(
 
 function updateCourse(jsonRes, res, fileId) {
   console.log("uc");
+  console.log(jsonRes);
   db.query(
-    `UPDATE courses SET \`year\` = ${jsonRes.year}, \`semester\` = ${jsonRes.semester}, \`department\` = ${jsonRes.department}, \`grade\` = ${jsonRes.grade}, \`courseName\` = ${jsonRes.courseName}, \`professorName\` = ${jsonRes.professorName}, tutorName = ${jsonRes.tutorName}, \`tutorNumber\` = ${jsonRes.tutorNumber}, \`limit\` = ${jsonRes.limit}, \`fileId\` = ${fileId} WHERE id = ${jsonRes.courseId};`,
+    `UPDATE courses SET \`year\` = ${jsonRes.year}, \`semester\` = ${jsonRes.semester}, \`department\` = ${jsonRes.department}, \`grade\` = ${jsonRes.grade}, \`courseName\` = ${jsonRes.courseName}, \`professorName\` = ${jsonRes.professorName}, \`tutorName\` = ${jsonRes.tutorName}, \`tutorNumber\` = ${jsonRes.tutorNumber}, \`limit\` = ${jsonRes.limit}, \`fileId\` = ${fileId} WHERE id = ${jsonRes.courseId};`,
     (err, result) => {
+      console.log(err, result);
       if (err) {
         return res.status(400).send({
           success: false,
@@ -153,10 +155,10 @@ router.post(
   upload.single("file"),
   (req, res, next) => {
     console.log(req.body);
-    getResult(db, `SELECT * FROM \`courses\` WHERE id = ${req.body.courseId};`)
+    await getResult(db, `SELECT * FROM \`courses\` WHERE id = ${req.body.courseId};`)
       .then((result) => {
         console.log(result);
-        const fileId = result.fileId;
+        const fileId = result[0].fileId;
         console.log(fileId);
         if (req.file) {
           db.query(
