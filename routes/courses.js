@@ -129,6 +129,7 @@ router.post(
 );
 
 function updateCourse(jsonRes, res, fileId) {
+  console.log("uc");
   db.query(
     `UPDATE courses SET \`year\` = ${jsonRes.year}, \`semester\` = ${jsonRes.semester}, \`department\` = ${jsonRes.department}, \`grade\` = ${jsonRes.grade}, \`courseName\` = ${jsonRes.courseName}, \`professorName\` = ${jsonRes.professorName}, tutorName = ${jsonRes.tutorName}, \`tutorNumber\` = ${jsonRes.tutorNumber}, \`limit\` = ${jsonRes.limit}, \`fileId\` = ${fileId} WHERE id = ${jsonRes.courseId};`,
     (err, result) => {
@@ -154,13 +155,16 @@ router.post(
     console.log(req.body);
     getResult(db, `SELECT * FROM \`courses\` WHERE id = ${req.body.courseId};`)
       .then((result) => {
+        console.log(result);
         const fileId = result.fileId;
+        console.log(fileId);
         if (req.file) {
           db.query(
             `INSERT INTO \`files\` (\`originalFileName\`, \`serverFileName\`, \`type\`) VALUES (${db.escape(
               req.file.originalname
             )}, ${db.escape(req.file.filename)}, ${db.escape(0)});`,
             (err, result) => {
+              console.log(err, result);
               if (err) {
                 return res.status(400).send({
                   success: false,
