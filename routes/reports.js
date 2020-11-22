@@ -48,8 +48,8 @@ router.post(
           db.query(
             `INSERT INTO \`reports\` (\`accountId\`,\`courseId\`, \`week\`, \`fileId\`) VALUES (${db.escape(
               accountData.id
-            )}, ${db.escape(req.params.courseId)}, ${db.escape(
-              req.params.week
+            )}, ${db.escape(req.body.courseId)}, ${db.escape(
+              req.body.week
             )}, ${db.escape(result.insertId)});`,
             (err, result) => {
               if (err) {
