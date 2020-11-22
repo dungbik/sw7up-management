@@ -153,9 +153,12 @@ router.post(
   "/modify",
   userMiddleware.isLoggedIn,
   upload.single("file"),
-  (req, res, next) => {
+  async (req, res, next) => {
     console.log(req.body);
-    await getResult(db, `SELECT * FROM \`courses\` WHERE id = ${req.body.courseId};`)
+    return await getResult(
+      db,
+      `SELECT * FROM \`courses\` WHERE id = ${req.body.courseId};`
+    )
       .then((result) => {
         console.log(result);
         const fileId = result[0].fileId;
