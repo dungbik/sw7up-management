@@ -226,6 +226,7 @@ router.get("/download/:fileId", userMiddleware.isLoggedIn, (req, res, next) => {
             "attachment; filename=" + result[0].originalFileName
           );
           res.setHeader("Content-type", mimeType);
+          res.setHeader("File-Name", result[0].originalFileName);
 
           var filestream = fs.createReadStream(file);
           filestream.pipe(res);
