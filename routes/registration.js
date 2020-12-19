@@ -18,7 +18,7 @@ router.get("/", userMiddleware.isLoggedIn, (req, res, next) => {
         });
       }
 
-      ids = result.map((n) => n.id);
+      ids = result.map((n) => n.courseId);
 
       db.query(
         `SELECT * FROM \`courses\` WHERE \`id\` IN (${db.escape(ids)});`,
@@ -78,6 +78,41 @@ router.post("/register", userMiddleware.isLoggedIn, (req, res, next) => {
         success: true,
         msg: "튜터링 강의 신청 성공!",
       });
+    }
+  );
+});
+
+router.post("/get", userMiddleware.isAdmin, (req, res, next) => {
+  db.query(
+    `SELECT * FROM \`registrations\` WHERE \`courseId\` = ${db.escape(
+      req.body.courseId
+    )};`,
+    (err, result) => {
+      if (err) {
+        return res.status(400).send({
+          success: false,
+          msg: err,
+        });
+      }
+
+      ids = result.map((n) => n.accountId);
+
+      db.query(
+        `SELECT * FROM \`accounts\` WHERE \`id\` IN (${db.escape(ids)});`,
+        (err, result) => {
+          if (err) {
+            return res.status(400).send({
+              success: false,
+              msg: err,
+            });
+          }
+
+          return res.status(200).send({
+            success: true,
+            result,
+          });
+        }
+      );
     }
   );
 });
