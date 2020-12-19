@@ -4,7 +4,8 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const mime = require("mime-types");
-const { getResult } = require("../lib/util");
+const { getResult, getDownloadFilename } = require("../lib/util");
+
 const uploadFolder = "uploadFiles/";
 
 let storage = multer.diskStorage({
@@ -226,6 +227,53 @@ router.post("/find", userMiddleware.isAdmin, async (req, res, next) => {
         msg: err,
       });
     });
+});
+
+router.get("/download", userMiddleware.isAdmin, (req, res, next) => {
+  db.query(
+    `SELECT * FROM \`files\` WHERE id = ${db.escape(req.body.fileId)};`,
+    (err, result) => {
+      if (err) {
+        return res.status(400).send({
+          success: false,
+          msg: err,
+        });
+      }
+      const file = uploadFolder + result[0].serverFileName;
+
+      try {
+        if (fs.existsSync(file)) {
+          const mimeType = mime.lookup(file);
+
+          res.setHeader(
+            "Content-disposition",
+            "attachment; filename=" +
+              getDownloadFilename(req, result[0].originalFileName)
+          );
+          res.setHeader("Content-type", mimeType);
+          res.setHeader(
+            "File-Name",
+            getDownloadFilename(req, result[0].originalFileName)
+          );
+
+          var filestream = fs.createReadStream(file);
+          filestream.pipe(res);
+        } else {
+          return res.status(400).send({
+            success: false,
+            msg: "서버에 파일이 존재하지 않습니다.",
+          });
+        }
+      } catch (e) {
+        if (err) {
+          return res.status(400).send({
+            success: false,
+            msg: e,
+          });
+        }
+      }
+    }
+  );
 });
 
 module.exports = router;
