@@ -5,6 +5,7 @@ const path = require("path");
 const fs = require("fs");
 const mime = require("mime-types");
 const { getResult, getDownloadFilename } = require("../lib/util");
+const zip = require("node-zip");
 
 const uploadFolder = "uploadFiles/";
 
@@ -229,7 +230,7 @@ router.post("/find", userMiddleware.isAdmin, async (req, res, next) => {
     });
 });
 
-router.get("/download", userMiddleware.isAdmin, (req, res, next) => {
+router.post("/download", userMiddleware.isAdmin, (req, res, next) => {
   db.query(
     `SELECT * FROM \`files\` WHERE id = ${db.escape(req.body.fileId)};`,
     (err, result) => {
@@ -272,6 +273,90 @@ router.get("/download", userMiddleware.isAdmin, (req, res, next) => {
           });
         }
       }
+    }
+  );
+});
+
+router.get("/download/week", userMiddleware.isAdmin, (req, res, next) => {
+  db.query(
+    `SELECT * FROM \`courses\` WHERE year = ${db.escape(
+      req.body.year
+    )} AND semester = ${db.escape(req.body.semester)};`,
+    //`SELECT * FROM \`courses\` WHERE year = 2020 AND semester = 2`,
+    (err, result) => {
+      if (err) {
+        return res.status(400).send({
+          success: false,
+          msg: err,
+        });
+      }
+
+      ids = result.map((n) => n.id);
+      db.query(
+        `SELECT * FROM \`reports\` WHERE \`courseId\` IN (${db.escape(ids)});`,
+        (err, result) => {
+          if (err) {
+            return res.status(400).send({
+              success: false,
+              msg: err,
+            });
+          }
+
+          ids = result.map((report) => {
+            if (report.week === req.body.week) {
+              return report.fileId;
+            }
+          });
+
+          db.query(
+            `SELECT * FROM \`files\` WHERE id IN (${db.escape(ids)});`,
+            (err, result) => {
+              if (err) {
+                return res.status(400).send({
+                  success: false,
+                  msg: err,
+                });
+              }
+              var zip2 = new require("node-zip")();
+              for (let i in result)
+                zip2.file(
+                  result[i].serverFileName,
+                  fs.readFileSync(uploadFolder + result[i].serverFileName)
+                );
+
+              var data = zip2.generate({
+                base64: false,
+                compression: "DEFLATE",
+              });
+              const file = uploadFolder + "week-" + Date.now() + ".zip";
+              fs.writeFileSync(file, data, "binary");
+
+              if (fs.existsSync(file)) {
+                const mimeType = mime.lookup(file);
+
+                res.setHeader(
+                  "Content-disposition",
+                  "attachment; filename=" +
+                    getDownloadFilename(req, "week" + req.body.week + ".zip")
+                );
+                res.setHeader("Content-type", mimeType);
+                res.setHeader(
+                  "File-Name",
+                  getDownloadFilename(req, "week" + req.body.week + ".zip")
+                );
+
+                var filestream = fs.createReadStream(file);
+                filestream.pipe(res);
+              } else {
+                return res.status(400).send({
+                  success: false,
+                  msg: "서버에 파일이 존재하지 않습니다.",
+                });
+              }
+            }
+          );
+        }
+      );
     }
   );
 });
