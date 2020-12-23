@@ -220,69 +220,81 @@ router.post("/modify", userMiddleware.isLoggedIn, (req, res, next) => {
   );
 });
 
-router.post("/checkToken", (req, res, next) => {
+router.post("/changePassword", async (req, res, next) => {
   const studentNumber = req.body.studentNumber;
   const token = req.body.token;
-  db.query(
-    `SELECT * FROM accounts WHERE _id = ${db.escape(studentNumber)};`,
-    (err, result) => {
+  const password = req.body.password;
+  const result = await verifyToken(studentNumber, token)
+    .then(() => ({ success: true }))
+    .catch((err) => ({ success: false, msg: err }));
+
+  if (result.success) {
+    bcrypt.hash(req.body.password, 10, (err, hash) => {
       if (err) {
         return res.status(200).json({
           success: false,
           msg: err,
         });
-      }
-      if (result.length == 0) {
-        return res.status(200).json({
-          success: false,
-          msg: "존재하지 않는 학번입니다",
-        });
-      }
-      let accountId = result[0].id;
-      db.query(
-        `SELECT * FROM auth WHERE accountId = ${db.escape(accountId)};`,
-        (err, result) => {
-          if (err) {
-            return res.status(200).json({
-              success: false,
-              msg: err,
-            });
-          }
-          if (result.length == 0) {
-            return res.status(200).json({
-              success: false,
-              msg: "토큰을 발급받지 않은 학번입니다",
-            });
-          }
-
-          const realToken = result[0].token;
-          if (realToken != token) {
-            return res.status(200).json({
-              success: false,
-              msg: "토큰이 틀렸습니다.",
-            });
-          }
-
-          db.query(
-            `DELETE FROM \`auth\` WHERE \`accountId\` = ${db.escape(
-              accountId
-            )};`,
-            (err, result) => {
-              if (err) {
-                return res.status(200).send({
-                  success: false,
-                  msg: err,
-                });
-              }
-              return res.status(200).send({
-                success: true,
+      } else {
+        db.query(
+          `UPDATE accounts SET password = ${db.escape(
+            hash
+          )} WHERE _id = ${db.escape(studentNumber)};`,
+          (err, result) => {
+            if (err) {
+              return res.status(200).json({
+                success: false,
+                msg: err,
               });
             }
-          );
-        }
-      );
-    }
-  );
+            return res.status(200).json({
+              success: true,
+            });
+          }
+        );
+      }
+    });
+  } else {
+    return res.status(200).json(result);
+  }
+});
+
+function verifyToken(studentNumber, token) {
+  return new Promise(function (resolve, reject) {
+    db.query(
+      `SELECT * FROM accounts WHERE _id = ${db.escape(studentNumber)};`,
+      (err, result) => {
+        if (err) reject(err);
+
+        if (result.length == 0) reject(err);
+
+        let accountId = result[0].id;
+        db.query(
+          `SELECT * FROM auth WHERE accountId = ${db.escape(accountId)};`,
+          (err, result) => {
+            if (err) reject(err);
+
+            if (result.length == 0) reject(err);
+
+            const realToken = result[0].token;
+
+            if (realToken != token) reject("토큰이 틀렸습니다.");
+
+            resolve();
+          }
+        );
+      }
+    );
+  });
+}
+
+router.post("/checkToken", async (req, res, next) => {
+  const studentNumber = req.body.studentNumber;
+  const token = req.body.token;
+  const result = await verifyToken(studentNumber, token)
+    .then(() => ({ success: true }))
+    .catch((err) => ({ success: false, msg: err }));
+  return res.status(200).send(result);
 });
 
 router.get("/makeToken/:studentNumber", (req, res, next) => {
