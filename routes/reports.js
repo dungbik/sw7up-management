@@ -277,7 +277,17 @@ router.post("/download", userMiddleware.isAdmin, (req, res, next) => {
   );
 });
 
-router.post("/download/week", userMiddleware.isAdmin, (req, res, next) => {
+router.post("/downloads", userMiddleware.isAdmin, (req, res, next) => {
+  let week = -1;
+  let accountId = -1;
+
+  if (req.body.week) {
+    week = req.body.week;
+  }
+  if (req.body.accountId) {
+    accountId = req.body.accountId;
+  }
+
   db.query(
     `SELECT * FROM \`courses\` WHERE year = ${db.escape(
       req.body.year
@@ -303,7 +313,10 @@ router.post("/download/week", userMiddleware.isAdmin, (req, res, next) => {
           }
 
           ids = result.map((report) => {
-            if (report.week === req.body.week) {
+            if (
+              report.week == req.body.week ||
+              report.accountId == req.body.accountId
+            ) {
               return report.fileId;
             }
           });
@@ -337,12 +350,20 @@ router.post("/download/week", userMiddleware.isAdmin, (req, res, next) => {
                 res.setHeader(
                   "Content-disposition",
                   "attachment; filename=" +
-                    getDownloadFilename(req, "week" + req.body.week + ".zip")
+                    getDownloadFilename(
+                      req,
+                      (week != -1 ? "week-" + week : "student-" + accountId) +
+                        ".zip"
+                    )
                 );
                 res.setHeader("Content-type", mimeType);
                 res.setHeader(
                   "File-Name",
-                  getDownloadFilename(req, "week" + req.body.week + ".zip")
+                  getDownloadFilename(
+                    req,
+                    (week != -1 ? "week-" + week : "student-" + accountId) +
+                      ".zip"
+                  )
                 );
 
                 var filestream = fs.createReadStream(file);
