@@ -4,7 +4,7 @@ const router = express.Router();
 const db = require("../lib/db");
 const userMiddleware = require("../middleware/accounts");
 
-router.get("/", userMiddleware.isAdmin, (req, res, next) => {
+router.get("/", (req, res, next) => {
   db.query(`SELECT * FROM systems;`, (err, result) => {
     if (err) {
       return res.status(400).json({
@@ -19,35 +19,31 @@ router.get("/", userMiddleware.isAdmin, (req, res, next) => {
   });
 });
 
-router.get(
-  "/find/:systemId/:year/:semester",
-  userMiddleware.isAdmin,
-  (req, res, next) => {
-    const accountData = req.accountData;
-    db.query(
-      `SELECT * FROM periods WHERE systemId = ${req.params.systemId} AND year = ${req.params.year} AND semester = ${req.params.semester};`,
-      (err, result) => {
-        if (err) {
-          return res.status(400).send({
-            success: false,
-            msg: err,
-          });
-        }
-        if (!result.length) {
-          return res.status(400).send({
-            success: false,
-            msg: err,
-          });
-        }
-
-        return res.status(200).send({
-          success: true,
-          result: result[0],
+router.get("/find/:systemId/:year/:semester", (req, res, next) => {
+  const accountData = req.accountData;
+  db.query(
+    `SELECT * FROM periods WHERE systemId = ${req.params.systemId} AND year = ${req.params.year} AND semester = ${req.params.semester};`,
+    (err, result) => {
+      if (err) {
+        return res.status(400).send({
+          success: false,
+          msg: err,
         });
       }
-    );
-  }
-);
+      if (!result.length) {
+        return res.status(400).send({
+          success: false,
+          msg: err,
+        });
+      }
+
+      return res.status(200).send({
+        success: true,
+        result: result[0],
+      });
+    }
+  );
+});
 
 router.post("/modify", userMiddleware.isAdmin, (req, res, next) => {
   const accountData = req.accountData;
