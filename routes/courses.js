@@ -36,7 +36,7 @@ function getCount(id) {
       )};`,
       (err, result) => {
         if (err) {
-          return res.status(400).send({
+          return res.status(200).send({
             success: false,
             msg: err,
           });
@@ -58,7 +58,7 @@ router.get(
       )} AND \`semester\` = ${db.escape(req.params.semester)};`,
       async (err, result) => {
         if (err) {
-          return res.status(400).send({
+          return res.status(200).send({
             success: false,
             msg: err,
           });
@@ -89,7 +89,7 @@ function saveCourse(body, res, fileId) {
     )}, ${db.escape(body.limit)}, ${db.escape(fileId)});`,
     (err, result) => {
       if (err) {
-        return res.status(400).send({
+        return res.status(200).send({
           success: false,
           msg: err,
         });
@@ -114,7 +114,7 @@ router.post(
         )}, ${db.escape(req.file.filename)}, ${db.escape(0)});`,
         (err, result) => {
           if (err) {
-            return res.status(400).send({
+            return res.status(200).send({
               success: false,
               msg: err,
             });
@@ -150,7 +150,7 @@ function updateCourse(jsonRes, res, fileId) {
     (err, result) => {
       console.log(err, result);
       if (err) {
-        return res.status(400).send({
+        return res.status(200).send({
           success: false,
           msg: err,
         });
@@ -185,7 +185,7 @@ router.post(
             (err, result) => {
               console.log(err, result);
               if (err) {
-                return res.status(400).send({
+                return res.status(200).send({
                   success: false,
                   msg: err,
                 });
@@ -199,7 +199,7 @@ router.post(
         }
       })
       .catch((err) => {
-        return res.status(400).send({
+        return res.status(200).send({
           success: false,
           msg: err,
         });
@@ -213,7 +213,7 @@ router.get("/delete/:id", userMiddleware.isAdmin, (req, res, next) => {
     `DELETE FROM \`courses\` WHERE \`id\` = ${db.escape(req.params.id)};`,
     (err, result) => {
       if (err) {
-        return res.status(400).send({
+        return res.status(200).send({
           success: false,
           msg: err,
         });
@@ -231,7 +231,7 @@ router.get("/download/:fileId", userMiddleware.isLoggedIn, (req, res, next) => {
     `SELECT * FROM \`files\` WHERE id = ${db.escape(req.params.fileId)};`,
     (err, result) => {
       if (err) {
-        return res.status(400).send({
+        return res.status(200).send({
           success: false,
           msg: err,
         });
@@ -256,14 +256,14 @@ router.get("/download/:fileId", userMiddleware.isLoggedIn, (req, res, next) => {
           var filestream = fs.createReadStream(file);
           filestream.pipe(res);
         } else {
-          return res.status(400).send({
+          return res.status(200).send({
             success: false,
             msg: "서버에 파일이 존재하지 않습니다.",
           });
         }
       } catch (e) {
         if (err) {
-          return res.status(400).send({
+          return res.status(200).send({
             success: false,
             msg: e,
           });
