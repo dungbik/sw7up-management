@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
+const Email = require("email-templates");
+const crypto = require("crypto");
 
 const db = require("../lib/db");
 const userMiddleware = require("../middleware/accounts");
@@ -213,6 +216,157 @@ router.post("/modify", userMiddleware.isLoggedIn, (req, res, next) => {
           );
         }
       });
+    }
+  );
+});
+
+router.post("/checkToken", (req, res, next) => {
+  const studentNumber = req.body.studentNumber;
+  const token = req.body.token;
+  db.query(
+    `SELECT * FROM accounts WHERE _id = ${db.escape(studentNumber)};`,
+    (err, result) => {
+      if (err) {
+        return res.status(200).json({
+          success: false,
+          msg: err,
+        });
+      }
+      if (result.length == 0) {
+        return res.status(200).json({
+          success: false,
+          msg: "존재하지 않는 학번입니다",
+        });
+      }
+      let accountId = result[0].id;
+      db.query(
+        `SELECT * FROM auth WHERE accountId = ${db.escape(accountId)};`,
+        (err, result) => {
+          if (err) {
+            return res.status(200).json({
+              success: false,
+              msg: err,
+            });
+          }
+          if (result.length == 0) {
+            return res.status(200).json({
+              success: false,
+              msg: "토큰을 발급받지 않은 학번입니다",
+            });
+          }
+
+          const realToken = result[0].token;
+          if (realToken != token) {
+            return res.status(200).json({
+              success: false,
+              msg: "토큰이 틀렸습니다.",
+            });
+          }
+
+          db.query(
+            `DELETE FROM \`auth\` WHERE \`accountId\` = ${db.escape(
+              accountId
+            )};`,
+            (err, result) => {
+              if (err) {
+                return res.status(200).send({
+                  success: false,
+                  msg: err,
+                });
+              }
+              return res.status(200).send({
+                success: true,
+              });
+            }
+          );
+        }
+      );
+    }
+  );
+});
+
+router.get("/makeToken/:studentNumber", (req, res, next) => {
+  db.query(
+    `SELECT * FROM accounts WHERE _id = ${db.escape(
+      req.params.studentNumber
+    )};`,
+    (err, result) => {
+      if (err) {
+        return res.status(200).json({
+          success: false,
+          msg: err,
+        });
+      }
+      if (result.length == 0) {
+        return res.status(200).json({
+          success: false,
+          msg: "존재하지 않는 학번입니다",
+        });
+      }
+      const accountId = result[0].id;
+      let email = result[0].email;
+
+      const len = email.split("@")[0].length - 3;
+
+      email = email.replace(new RegExp(".(?=.{0," + len + "}@)", "g"), "*");
+
+      const token = crypto.randomBytes(5).toString("hex");
+
+      db.query(
+        `DELETE FROM \`auth\` WHERE \`accountId\` = ${db.escape(accountId)};`,
+        (err, result) => {
+          if (err) {
+            return res.status(200).send({
+              success: false,
+              msg: err,
+            });
+          }
+
+          db.query(
+            `INSERT INTO \`auth\` (\`accountId\`, \`token\`, \`ttl\`) VALUES (${db.escape(
+              req.params.studentNumber
+            )}, ${db.escape(token)}, ${db.escape(0)});`,
+            (err, result) => {
+              if (err) {
+                return res.status(200).json({
+                  success: false,
+                  msg: err,
+                });
+              }
+              var mailPoster = nodemailer.createTransport({
+                service: "Naver",
+                host: "smtp.naver.com",
+                port: 587,
+                auth: {
+                  user: process.env.NAVER_USER,
+                  pass: process.env.NAVER_PASS,
+                },
+              });
+
+              const mailOptions = {
+                from: "noreply@naver.com",
+                to: email,
+                subject: "인증번호",
+                text: `비밀번호 재설정 인증 번호 : ${token}`,
+              };
+
+              mailPoster.sendMail(mailOptions, function (error, info) {
+                if (error) {
+                  return res.status(200).json({
+                    success: false,
+                    msg: "메일 전송 실패",
+                  });
+                } else {
+                  return res.status(200).json({
+                    success: true,
+                    email: email,
+                  });
+                }
+              });
+            }
+          );
+        }
+      );
     }
   );
 });
