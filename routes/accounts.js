@@ -327,7 +327,7 @@ router.get("/makeToken/:studentNumber", (req, res, next) => {
 
           db.query(
             `INSERT INTO \`auth\` (\`accountId\`, \`token\`, \`ttl\`) VALUES (${db.escape(
-              req.params.studentNumber
+              accountId
             )}, ${db.escape(token)}, ${db.escape(0)});`,
             (err, result) => {
               if (err) {
@@ -347,7 +347,7 @@ router.get("/makeToken/:studentNumber", (req, res, next) => {
               });
 
               const mailOptions = {
-                from: "noreply@naver.com",
+                from: "ghks0630@naver.com",
                 to: oriEmail,
                 subject: "인증번호",
                 text: `비밀번호 재설정 인증 번호 : ${token}`,
