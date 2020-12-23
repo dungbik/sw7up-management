@@ -14,20 +14,20 @@ router.post("/register", (req, res, next) => {
     `SELECT * FROM accounts WHERE _id = LOWER(${db.escape(req.body._id)});`,
     (err, result) => {
       if (err) {
-        return res.status(400).json({
+        return res.status(200).json({
           success: false,
           msg: err,
         });
       }
       if (result.length) {
-        return res.status(409).json({
+        return res.status(200).json({
           success: false,
           msg: "이미 가입된 학번입니다!",
         });
       } else {
         bcrypt.hash(req.body.password, 10, (err, hash) => {
           if (err) {
-            return res.status(500).json({
+            return res.status(200).json({
               success: false,
               msg: err,
             });
@@ -42,7 +42,7 @@ router.post("/register", (req, res, next) => {
               )}, ${db.escape(req.body.role)}, ${db.escape("")});`,
               (err, result) => {
                 if (err) {
-                  return res.status(400).json({
+                  return res.status(200).json({
                     success: false,
                     msg: err,
                   });
