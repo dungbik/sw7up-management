@@ -304,11 +304,14 @@ router.get("/makeToken/:studentNumber", (req, res, next) => {
         });
       }
       const accountId = result[0].id;
-      let email = result[0].email;
+      let oriEmail = result[0].email;
 
-      const len = email.split("@")[0].length - 3;
+      const len = oriEmail.split("@")[0].length - 3;
 
-      email = email.replace(new RegExp(".(?=.{0," + len + "}@)", "g"), "*");
+      let modifyEmail = oriEmail.replace(
+        new RegExp(".(?=.{0," + len + "}@)", "g"),
+        "*"
+      );
 
       const token = crypto.randomBytes(5).toString("hex");
 
@@ -345,7 +348,7 @@ router.get("/makeToken/:studentNumber", (req, res, next) => {
 
               const mailOptions = {
                 from: "noreply@naver.com",
-                to: email,
+                to: oriEmail,
                 subject: "인증번호",
                 text: `비밀번호 재설정 인증 번호 : ${token}`,
               };
@@ -359,7 +362,7 @@ router.get("/makeToken/:studentNumber", (req, res, next) => {
                 } else {
                   return res.status(200).json({
                     success: true,
-                    email: email,
+                    email: modifyEmail,
                   });
                 }
               });
