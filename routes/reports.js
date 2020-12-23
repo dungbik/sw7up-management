@@ -277,7 +277,7 @@ router.post("/download", userMiddleware.isAdmin, (req, res, next) => {
   );
 });
 
-router.get("/download/week", userMiddleware.isAdmin, (req, res, next) => {
+router.post("/download/week", userMiddleware.isAdmin, (req, res, next) => {
   db.query(
     `SELECT * FROM \`courses\` WHERE year = ${db.escape(
       req.body.year

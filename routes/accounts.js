@@ -229,7 +229,7 @@ router.post("/changePassword", async (req, res, next) => {
     .catch((err) => ({ success: false, msg: err }));
 
   if (result.success) {
-    bcrypt.hash(req.body.password, 10, (err, hash) => {
+    bcrypt.hash(password, 10, (err, hash) => {
       if (err) {
         return res.status(200).json({
           success: false,
