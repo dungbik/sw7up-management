@@ -279,13 +279,13 @@ router.post("/download", userMiddleware.isAdmin, (req, res, next) => {
 
 router.post("/downloads", userMiddleware.isAdmin, (req, res, next) => {
   let week = -1;
-  let accountId = -1;
+  let _id = -1;
 
   if (req.body.week) {
     week = req.body.week;
   }
-  if (req.body.accountId) {
-    accountId = req.body.accountId;
+  if (req.body._id) {
+    _id = req.body._id;
   }
 
   db.query(
@@ -312,17 +312,8 @@ router.post("/downloads", userMiddleware.isAdmin, (req, res, next) => {
             });
           }
 
-          ids = result.map((report) => {
-            if (
-              report.week == req.body.week ||
-              report.accountId == req.body.accountId
-            ) {
-              return report.fileId;
-            }
-          });
-
           db.query(
-            `SELECT * FROM \`files\` WHERE id IN (${db.escape(ids)});`,
+            `SELECT * FROM \`accounts\` WHERE \`_id\` = ${db.escape(_id)};`,
             (err, result) => {
               if (err) {
                 return res.status(400).send({
@@ -330,50 +321,69 @@ router.post("/downloads", userMiddleware.isAdmin, (req, res, next) => {
                   msg: err,
                 });
               }
-              var zip2 = new require("node-zip")();
-              for (let i in result)
-                zip2.file(
-                  result[i].serverFileName,
-                  fs.readFileSync(uploadFolder + result[i].serverFileName)
-                );
-
-              var data = zip2.generate({
-                base64: false,
-                compression: "DEFLATE",
+              const accountId = result[0].id;
+              ids = result.map((report) => {
+                if (report.week == week || report.accountId == accountId) {
+                  return report.fileId;
+                }
               });
-              const file = uploadFolder + "week-" + Date.now() + ".zip";
-              fs.writeFileSync(file, data, "binary");
 
-              if (fs.existsSync(file)) {
-                const mimeType = mime.lookup(file);
+              db.query(
+                `SELECT * FROM \`files\` WHERE id IN (${db.escape(ids)});`,
+                (err, result) => {
+                  if (err) {
+                    return res.status(400).send({
+                      success: false,
+                      msg: err,
+                    });
+                  }
+                  var zip2 = new require("node-zip")();
+                  for (let i in result)
+                    zip2.file(
+                      result[i].serverFileName,
+                      fs.readFileSync(uploadFolder + result[i].serverFileName)
+                    );
 
-                res.setHeader(
-                  "Content-disposition",
-                  "attachment; filename=" +
-                    getDownloadFilename(
-                      req,
-                      (week != -1 ? "week-" + week : "student-" + accountId) +
-                        ".zip"
-                    )
-                );
-                res.setHeader("Content-type", mimeType);
-                res.setHeader(
-                  "File-Name",
-                  getDownloadFilename(
-                    req,
-                    (week != -1 ? "week-" + week : "student-" + accountId) +
-                      ".zip"
-                  )
-                );
+                  var data = zip2.generate({
+                    base64: false,
+                    compression: "DEFLATE",
+                  });
+                  const file = uploadFolder + "week-" + Date.now() + ".zip";
+                  fs.writeFileSync(file, data, "binary");
 
-                var filestream = fs.createReadStream(file);
-                filestream.pipe(res);
-              } else {
-                return res.status(400).send({
-                  success: false,
-                  msg: "서버에 파일이 존재하지 않습니다.",
-                });
-              }
+                  if (fs.existsSync(file)) {
+                    const mimeType = mime.lookup(file);
+
+                    res.setHeader(
+                      "Content-disposition",
+                      "attachment; filename=" +
+                        getDownloadFilename(
+                          req,
+                          (week != -1
+                            ? "week-" + week
+                            : "student-" + accountId) + ".zip"
+                        )
+                    );
+                    res.setHeader("Content-type", mimeType);
+                    res.setHeader(
+                      "File-Name",
+                      getDownloadFilename(
+                        req,
+                        (week != -1 ? "week-" + week : "student-" + accountId) +
+                          ".zip"
+                      )
+                    );
+
+                    var filestream = fs.createReadStream(file);
+                    filestream.pipe(res);
+                  } else {
+                    return res.status(400).send({
+                      success: false,
+                      msg: "서버에 파일이 존재하지 않습니다.",
+                    });
+                  }
+                }
+              );
             }
           );
         }
