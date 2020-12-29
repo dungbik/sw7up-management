@@ -277,7 +277,22 @@ router.post("/download", userMiddleware.isAdmin, (req, res, next) => {
   );
 });
 
-router.post("/downloads", userMiddleware.isAdmin, (req, res, next) => {
+function getAccId(_id) {
+  return new Promise(function (resolve, reject) {
+    db.query(
+      `SELECT * FROM \`accounts\` WHERE \`_id\` = ${db.escape(_id)};`,
+      (err, result) => {
+        if (err) {
+          reject(err);
+        }
+        const accountId = result[0].id;
+        resolve(accountId);
+      }
+    );
+  });
+}
+
+router.post("/downloads", userMiddleware.isAdmin, async (req, res, next) => {
   let week = -1;
   let _id = -1;
 
@@ -287,6 +302,8 @@ router.post("/downloads", userMiddleware.isAdmin, (req, res, next) => {
   if (req.body._id) {
     _id = req.body._id;
   }
+
+  const accountId = await getAccId(_id).catch();
 
   db.query(
     `SELECT * FROM \`courses\` WHERE year = ${db.escape(
@@ -312,8 +329,22 @@ router.post("/downloads", userMiddleware.isAdmin, (req, res, next) => {
             });
           }
 
+          if (_id != -1 && accountId != -1) {
+            ids = result.map((report) => {
+              if (report.accountId == accountId) {
+                return report.fileId;
+              }
+            });
+          } else {
+            ids = result.map((report) => {
+              if (report.week == week) {
+                return report.fileId;
+              }
+            });
+          }
+
           db.query(
-            `SELECT * FROM \`accounts\` WHERE \`_id\` = ${db.escape(_id)};`,
+            `SELECT * FROM \`files\` WHERE id IN (${db.escape(ids)});`,
             (err, result) => {
               if (err) {
                 return res.status(400).send({
@@ -321,69 +352,50 @@ router.post("/downloads", userMiddleware.isAdmin, (req, res, next) => {
                   msg: err,
                 });
               }
-              const accountId = result[0].id;
-              ids = result.map((report) => {
-                if (report.week == week || report.accountId == accountId) {
-                  return report.fileId;
-                }
+              var zip2 = new require("node-zip")();
+              for (let i in result)
+                zip2.file(
+                  result[i].serverFileName,
+                  fs.readFileSync(uploadFolder + result[i].serverFileName)
+                );
+
+              var data = zip2.generate({
+                base64: false,
+                compression: "DEFLATE",
               });
+              const file = uploadFolder + "week-" + Date.now() + ".zip";
+              fs.writeFileSync(file, data, "binary");
 
-              db.query(
-                `SELECT * FROM \`files\` WHERE id IN (${db.escape(ids)});`,
-                (err, result) => {
-                  if (err) {
-                    return res.status(400).send({
-                      success: false,
-                      msg: err,
-                    });
-                  }
-                  var zip2 = new require("node-zip")();
-                  for (let i in result)
-                    zip2.file(
-                      result[i].serverFileName,
-                      fs.readFileSync(uploadFolder + result[i].serverFileName)
-                    );
+              if (fs.existsSync(file)) {
+                const mimeType = mime.lookup(file);
 
-                  var data = zip2.generate({
-                    base64: false,
-                    compression: "DEFLATE",
-                  });
-                  const file = uploadFolder + "week-" + Date.now() + ".zip";
-                  fs.writeFileSync(file, data, "binary");
+                res.setHeader(
+                  "Content-disposition",
+                  "attachment; filename=" +
+                    getDownloadFilename(
+                      req,
+                      (week != -1 ? "week-" + week : "student-" + accountId) +
+                        ".zip"
+                    )
+                );
+                res.setHeader("Content-type", mimeType);
+                res.setHeader(
+                  "File-Name",
+                  getDownloadFilename(
+                    req,
+                    (week != -1 ? "week-" + week : "student-" + accountId) +
+                      ".zip"
+                  )
+                );
 
-                  if (fs.existsSync(file)) {
-                    const mimeType = mime.lookup(file);
-
-                    res.setHeader(
-                      "Content-disposition",
-                      "attachment; filename=" +
-                        getDownloadFilename(
-                          req,
-                          (week != -1
-                            ? "week-" + week
-                            : "student-" + accountId) + ".zip"
-                        )
-                    );
-                    res.setHeader("Content-type", mimeType);
-                    res.setHeader(
-                      "File-Name",
-                      getDownloadFilename(
-                        req,
-                        (week != -1 ? "week-" + week : "student-" + accountId) +
-                          ".zip"
-                      )
-                    );
-
-                    var filestream = fs.createReadStream(file);
-                    filestream.pipe(res);
-                  } else {
-                    return res.status(400).send({
-                      success: false,
-                      msg: "서버에 파일이 존재하지 않습니다.",
-                    });
-                  }
-                }
-              );
+                var filestream = fs.createReadStream(file);
+                filestream.pipe(res);
+              } else {
+                return res.status(400).send({
+                  success: false,
+                  msg: "서버에 파일이 존재하지 않습니다.",
+                });
+              }
             }
           );
         }
