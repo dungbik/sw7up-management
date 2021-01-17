@@ -78,7 +78,7 @@ router.get(
 
 function saveCourse(body, res, fileId) {
   db.query(
-    `INSERT INTO \`courses\` (\`year\`, \`semester\`, \`department\`, \`grade\`, \`courseName\`, \`professorName\`, \`tutorName\`, \`tutorNumber\`, \`limit\`, \`fileId\`) VALUES (${db.escape(
+    `INSERT INTO \`courses\` (\`year\`, \`semester\`, \`department\`, \`grade\`, \`courseName\`, \`professorName\`, \`tutorName\`, \`tutorNumber\`, \`limit\`, \`fileId\`, \`profile\`) VALUES (${db.escape(
       body.year
     )}, ${db.escape(body.semester)}, ${db.escape(body.department)}, ${db.escape(
       body.grade
@@ -86,7 +86,9 @@ function saveCourse(body, res, fileId) {
       body.professorName
     )}, ${db.escape(body.tutorName)}, ${db.escape(
       body.tutorNumber
-    )}, ${db.escape(body.limit)}, ${db.escape(fileId)});`,
+    )}, ${db.escape(body.limit)}, ${db.escape(fileId)}, ${db.escape(
+      body.profile
+    )}));`,
     (err, result) => {
       if (err) {
         return res.status(200).send({
@@ -129,8 +131,6 @@ router.post(
 );
 
 function updateCourse(jsonRes, res, fileId) {
-  console.log("uc");
-  console.log(jsonRes);
   db.query(
     `UPDATE \`courses\` SET \`year\` = ${db.escape(
       jsonRes.year
@@ -146,7 +146,9 @@ function updateCourse(jsonRes, res, fileId) {
     )}, \`tutorNumber\` = ${db.escape(jsonRes.tutorNumber)}, 
     \`limit\` = ${db.escape(jsonRes.limit)}, \`fileId\` = ${db.escape(
       fileId
-    )} WHERE \`id\` = ${db.escape(jsonRes.courseId)};`,
+    )}, \`profile\` = ${db.escape(jsonRes.profile)} WHERE \`id\` = ${db.escape(
+      jsonRes.courseId
+    )};`,
     (err, result) => {
       console.log(err, result);
       if (err) {
@@ -183,7 +185,6 @@ router.post(
               req.file.originalname
             )}, ${db.escape(req.file.filename)}, ${db.escape(0)});`,
             (err, result) => {
-              console.log(err, result);
               if (err) {
                 return res.status(200).send({
                   success: false,

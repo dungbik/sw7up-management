@@ -37,13 +37,15 @@ CREATE TABLE `accounts` (
   `role` tinyint(1) unsigned NOT NULL,
   `token` varchar(500) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `accounts`
 --
 
 /*!40000 ALTER TABLE `accounts` DISABLE KEYS */;
+INSERT INTO `accounts` (`id`,`_id`,`password`,`name`,`email`,`phoneNumber`,`department`,`role`,`token`) VALUES 
+ (2,'admin','$2a$10$p0VZlpIiy2bWFkHf51NO3uOnBCUt7WxhQxiAmmzfx81.xHBU/sa5G','관리자','test@cbnu.ac.kr','01000000000',0,3,'');
 /*!40000 ALTER TABLE `accounts` ENABLE KEYS */;
 
 
@@ -58,7 +60,7 @@ CREATE TABLE `auth` (
   `token` varchar(45) NOT NULL,
   `ttl` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `auth`
@@ -85,8 +87,9 @@ CREATE TABLE `courses` (
   `limit` tinyint(1) unsigned NOT NULL,
   `fileId` int(10) unsigned NOT NULL,
   `grade` int(10) unsigned NOT NULL,
+  `profile` longtext NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `courses`
@@ -103,11 +106,11 @@ CREATE TABLE `courses` (
 DROP TABLE IF EXISTS `files`;
 CREATE TABLE `files` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `originalFileName` varchar(45) NOT NULL,
-  `serverFileName` varchar(45) NOT NULL,
+  `originalFileName` varchar(200) NOT NULL,
+  `serverFileName` varchar(200) NOT NULL,
   `type` tinyint(1) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `files`
@@ -150,7 +153,7 @@ CREATE TABLE `registrations` (
   `accountId` int(10) unsigned NOT NULL,
   `courseId` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `registrations`
@@ -172,7 +175,7 @@ CREATE TABLE `reports` (
   `week` int(10) unsigned NOT NULL,
   `fileId` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `reports`
@@ -191,13 +194,15 @@ CREATE TABLE `systems` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(45) CHARACTER SET utf8 NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `systems`
 --
 
 /*!40000 ALTER TABLE `systems` DISABLE KEYS */;
+INSERT INTO `systems` (`id`,`name`) VALUES 
+ (2,'튜터링');
 /*!40000 ALTER TABLE `systems` ENABLE KEYS */;
 
 
