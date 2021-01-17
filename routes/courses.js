@@ -88,7 +88,7 @@ function saveCourse(body, res, fileId) {
       body.tutorNumber
     )}, ${db.escape(body.limit)}, ${db.escape(fileId)}, ${db.escape(
       body.profile
-    )}));`,
+    )});`,
     (err, result) => {
       if (err) {
         return res.status(200).send({
