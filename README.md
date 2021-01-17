@@ -16,8 +16,10 @@ $ npm install
 ```
 HOST = host
 USER = user
-DATABASE = databse
+DATABASE = database
 PASSWORD = password
+NAVER_USER = 네이버 계정(@naver.com 포함)
+NAVER_PASS = 네이버 비밀번호
 ```
 
 <br>
