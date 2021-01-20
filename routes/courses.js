@@ -156,7 +156,6 @@ function updateCourse(jsonRes, res, fileId) {
       jsonRes.courseId
     )};`,
     (err, result) => {
-      console.log(err, result);
       if (err) {
         return res.status(200).send({
           success: false,
@@ -176,39 +175,38 @@ router.post(
   userMiddleware.isLoggedIn,
   upload.single("file"),
   async (req, res, next) => {
-    console.log(req.body);
-    return await getResult(
+    const result = await getResult(
       db,
       `SELECT * FROM \`courses\` WHERE id = ${req.body.courseId};`
-    )
-      .then((result) => {
-        const fileId = result[0].fileId;
-        if (req.file) {
-          db.query(
-            `INSERT INTO \`files\` (\`originalFileName\`, \`serverFileName\`, \`type\`) VALUES (${db.escape(
-              req.file.originalname
-            )}, ${db.escape(req.file.filename)}, ${db.escape(0)});`,
-            (err, result) => {
-              if (err) {
-                return res.status(200).send({
-                  success: false,
-                  msg: err,
-                });
-              }
+    );
 
-              updateCourse(req.body, res, result.insertId);
-            }
-          );
-        } else {
-          updateCourse(req.body, res, fileId);
-        }
-      })
-      .catch((err) => {
-        return res.status(200).send({
-          success: false,
-          msg: err,
-        });
+    if (result.length == 0) {
+      return res.status(200).send({
+        success: false,
+        msg: "존재하지 않는 강의입니다.",
       });
+    }
+
+    const fileId = result[0].fileId;
+    if (req.file) {
+      db.query(
+        `INSERT INTO \`files\` (\`originalFileName\`, \`serverFileName\`, \`type\`) VALUES (${db.escape(
+          req.file.originalname
+        )}, ${db.escape(req.file.filename)}, ${db.escape(0)});`,
+        (err, result) => {
+          if (err) {
+            return res.status(200).send({
+              success: false,
+              msg: err,
+            });
+          }
+
+          updateCourse(req.body, res, result.insertId);
+        }
+      );
+    } else {
+      updateCourse(req.body, res, fileId);
+    }
   }
 );
 

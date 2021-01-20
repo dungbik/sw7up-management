@@ -4,14 +4,8 @@ const app = express();
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const dotenv = require("dotenv");
-const path = require("path");
 
-dotenv.config({
-  path: path.resolve(
-    process.cwd(),
-    process.env.NODE_ENV == "production" ? ".env" : ".env.dev"
-  ),
-});
+dotenv.config();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());

@@ -5,7 +5,7 @@ module.exports = {
   isLoggedIn: (req, res, next) => {
     try {
       const token = req.cookies.w_auth;
-      const decoded = jwt.verify(token, "BESTSW7UP");
+      const decoded = jwt.verify(token, process.env.SECRET_KEY);
       db.query(
         `SELECT * FROM accounts WHERE token = ${db.escape(token)};`,
         (err, result) => {
@@ -35,7 +35,7 @@ module.exports = {
   isAdmin: (req, res, next) => {
     try {
       const token = req.cookies.w_auth;
-      const decoded = jwt.verify(token, "BESTSW7UP");
+      const decoded = jwt.verify(token, process.env.SECRET_KEY);
       db.query(
         `SELECT * FROM accounts WHERE token = ${db.escape(token)};`,
         (err, result) => {

@@ -40,6 +40,29 @@ router.get("/", userMiddleware.isLoggedIn, (req, res, next) => {
   );
 });
 
+router.get("/tutor", userMiddleware.isLoggedIn, (req, res, next) => {
+  const accountData = req.accountData;
+
+  db.query(
+    `SELECT * FROM \`courses\` WHERE \`tutorNumber\` IN (${db.escape(
+      accountData._id
+    )});`,
+    (err, result) => {
+      if (err) {
+        return res.status(400).send({
+          success: false,
+          msg: err,
+        });
+      }
+
+      return res.status(200).send({
+        success: true,
+        result,
+      });
+    }
+  );
+});
+
 router.get("/delete/:id", userMiddleware.isLoggedIn, (req, res, next) => {
   const accountData = req.accountData;
   db.query(

@@ -99,7 +99,7 @@ router.post("/login", (req, res, next) => {
                 role: accountData.role,
                 isAdmin: accountData.role === 3 ? true : false,
               },
-              "BESTSW7UP",
+              process.env.SECRET_KEY,
               {
                 expiresIn: "1h",
               }
